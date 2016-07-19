@@ -10,7 +10,11 @@ Maze::Unit::Unit(int d, int c) : display_char(d), color(c)
 {
 }
 
-Maze::Maze(unsigned w, unsigned h, const Unit& f, const Unit& wa) : width(w), height(h), floor(f), wall(wa), grid(width * height, &floor)
+Maze::MoveableUnit::MoveableUnit(const Unit& u, int a, int b) : Unit(u), x(a), y(b)
+{
+}
+
+Maze::Maze(unsigned w, unsigned h, const Unit& f, const Unit& wa, const Unit& pl) : width(w), height(h), floor(f), wall(wa), player(pl, 0, 0), grid(width * height, &floor)
 {
     generate_maze();
 }

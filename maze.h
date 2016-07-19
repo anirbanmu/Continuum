@@ -5,6 +5,8 @@
 #include <random>
 #include <tuple>
 
+#include "common.h"
+
 // Represents a randomly generated maze of arbitrary dimensions (determined at initialization)
 class Maze
 {
@@ -16,7 +18,13 @@ class Maze
             const int color;
         };
 
-        Maze(unsigned width, unsigned height, const Unit& floor, const Unit& wall);
+        struct MoveableUnit : Unit
+        {
+            MoveableUnit(const Unit&, int a, int b);
+            int x, y;
+        };
+
+        Maze(unsigned width, unsigned height, const Unit& floor, const Unit& wall, const Unit& player);
         Unit* const & cell(unsigned x, unsigned y) const;
 
         const unsigned width;
@@ -25,26 +33,11 @@ class Maze
     private:
         Unit*& cell(unsigned x, unsigned y);
         void generate_maze();
-
-        struct Point
-        {
-            int x, y;
-            Point(int a, int b) : x(a), y(b){}
-        };
-
-        struct Rect
-        {
-            Rect(int left, int top, int right, int bottom) : start(left, top), end(right, bottom){}
-            Rect(const Point& a, const Point& b) : start(a), end(b){}
-            Point dimensions() const { return Point(end.x - start.x, end.y - start.y); }
-            Point start;
-            Point end;
-        };
-
         static void subdivide_grid(Maze& maze, std::mt19937& mersenne_twister, const Rect&);
 
         Unit floor;
         Unit wall;
+        MoveableUnit player;
         std::vector<Unit*> grid; // Pointer array representing contents of maze grid
 };
 

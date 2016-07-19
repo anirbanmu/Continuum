@@ -32,21 +32,21 @@ int CursesHandler::get_color(int color)
     return colors[color] = index;
 }
 
-void CursesHandler::render(const Maze& maze, const tuple<unsigned, unsigned>& start)
+void CursesHandler::render(const Maze& maze, const Point& start)
 {
     int term_width = 0, term_height = 0;
     getmaxyx(stdscr, term_height, term_width);
 
-    const unsigned width = min(unsigned(term_width), maze.width - get<0>(start));
-    const unsigned height = min(unsigned(term_height), maze.height - get<1>(start));
-    for (unsigned x_incr = 0; x_incr < width; ++x_incr)
+    const unsigned width = min(unsigned(term_width), maze.width - start.x);
+    const unsigned height = min(unsigned(term_height), maze.height - start.y);
+    for (unsigned x = 0; x < width; ++x)
     {
-        for (unsigned y_incr = 0; y_incr < height; ++y_incr)
+        for (unsigned y = 0; y < height; ++y)
         {
-            const auto& cell = *maze.cell(get<0>(start) + x_incr, get<1>(start) + y_incr);
+            const auto& cell = *maze.cell(start.x + x, start.y + y);
             const unsigned color_index = get_color(cell.color);
             attron(COLOR_PAIR(color_index));
-            mvwaddch(stdscr, y_incr, x_incr, cell.display_char);
+            mvwaddch(stdscr, y, x, cell.display_char);
             attroff(COLOR_PAIR(color_index));
         }
     }
