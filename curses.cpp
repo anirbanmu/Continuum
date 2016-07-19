@@ -5,7 +5,7 @@
 
 using namespace std;
 
-CursesHandler::CursesHandler() : color_index(0)
+CursesHandler::CursesHandler() : color_index(1)
 {
     initscr();
     start_color();
