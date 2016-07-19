@@ -2,6 +2,8 @@
 #define _MAZE_H_HEADER_
 
 #include <vector>
+#include <random>
+#include <tuple>
 
 // Represents a randomly generated maze of arbitrary dimensions (determined at initialization)
 class Maze
@@ -9,8 +11,8 @@ class Maze
     public:
         struct Unit
         {
-            Unit(char display_char, int color);
-            const char display_char;
+            Unit(int display_char, int color);
+            const int display_char;
             const int color;
         };
 
@@ -23,10 +25,11 @@ class Maze
     private:
         Unit*& cell(unsigned x, unsigned y);
         void generate_maze();
+        static void subdivide_grid(Maze& maze, std::mt19937& mersenne_twister, std::tuple<unsigned, unsigned> rect_start, std::tuple<unsigned, unsigned> rect_end);
 
         Unit floor;
         Unit wall;
-        std::vector<Unit*> grid; // Integer array representing contents of maze grid
+        std::vector<Unit*> grid; // Pointer array representing contents of maze grid
 };
 
 #endif

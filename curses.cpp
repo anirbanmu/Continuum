@@ -8,11 +8,11 @@ using namespace std;
 CursesHandler::CursesHandler()
 {
     initscr();
-    start_color();
+    use_default_colors();
     raw();
     keypad(stdscr, TRUE);
     noecho();
-    use_default_colors();
+    start_color();
 }
 
 CursesHandler::~CursesHandler()
