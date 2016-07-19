@@ -10,7 +10,7 @@ Maze::Unit::Unit(int d, int c) : display_char(d), color(c)
 {
 }
 
-Maze::MoveableUnit::MoveableUnit(const Unit& u, int a, int b) : Unit(u), x(a), y(b)
+Maze::MoveableUnit::MoveableUnit(const Unit& u, int x, int y) : Unit(u), position(x, y)
 {
 }
 
@@ -27,6 +27,11 @@ Maze::Unit*& Maze::cell(unsigned x, unsigned y)
 Maze::Unit* const & Maze::cell(unsigned x, unsigned y) const
 {
     return grid[x + y * width];
+}
+
+vector<const Maze::MoveableUnit*> Maze::moveable_units() const
+{
+    return vector<const MoveableUnit*>(1, &player);
 }
 
 unsigned long ensure_in_range(unsigned long value, unsigned long minimum, unsigned long maximum)

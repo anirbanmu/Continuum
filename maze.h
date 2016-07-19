@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <random>
-#include <tuple>
 
 #include "common.h"
 
@@ -21,11 +20,12 @@ class Maze
         struct MoveableUnit : Unit
         {
             MoveableUnit(const Unit&, int a, int b);
-            int x, y;
+            Point position;
         };
 
         Maze(unsigned width, unsigned height, const Unit& floor, const Unit& wall, const Unit& player);
         Unit* const & cell(unsigned x, unsigned y) const;
+        std::vector<const MoveableUnit*> moveable_units() const;
 
         const unsigned width;
         const unsigned height;

@@ -13,6 +13,7 @@ CursesHandler::CursesHandler() : color_index(1)
     raw();
     keypad(stdscr, TRUE);
     noecho();
+    curs_set(0);
 }
 
 CursesHandler::~CursesHandler()
@@ -32,6 +33,14 @@ int CursesHandler::get_color(int color)
     return colors[color] = index;
 }
 
+void CursesHandler::draw_unit(const Maze::Unit& u, const Point& position)
+{
+    const unsigned color_index = get_color(u.color);
+    attron(COLOR_PAIR(color_index));
+    mvwaddch(stdscr, position.y, position.x, u.display_char);
+    attroff(COLOR_PAIR(color_index));
+}
+
 void CursesHandler::render(const Maze& maze, const Point& start)
 {
     int term_width = 0, term_height = 0;
@@ -43,12 +52,13 @@ void CursesHandler::render(const Maze& maze, const Point& start)
     {
         for (unsigned y = 0; y < height; ++y)
         {
-            const auto& cell = *maze.cell(start.x + x, start.y + y);
-            const unsigned color_index = get_color(cell.color);
-            attron(COLOR_PAIR(color_index));
-            mvwaddch(stdscr, y, x, cell.display_char);
-            attroff(COLOR_PAIR(color_index));
+            draw_unit(*maze.cell(start.x + x, start.y + y), Point(start.x + x, start.y + y));
         }
+    }
+
+    for (auto u : maze.moveable_units())
+    {
+        draw_unit(*u, u->position);
     }
 
     wrefresh(stdscr);
