@@ -25,7 +25,23 @@ class Maze
     private:
         Unit*& cell(unsigned x, unsigned y);
         void generate_maze();
-        static void subdivide_grid(Maze& maze, std::mt19937& mersenne_twister, std::tuple<unsigned, unsigned> rect_start, std::tuple<unsigned, unsigned> rect_end);
+
+        struct Point
+        {
+            int x, y;
+            Point(int a, int b) : x(a), y(b){}
+        };
+
+        struct Rect
+        {
+            Rect(int left, int top, int right, int bottom) : start(left, top), end(right, bottom){}
+            Rect(const Point& a, const Point& b) : start(a), end(b){}
+            Point dimensions() const { return Point(end.x - start.x, end.y - start.y); }
+            Point start;
+            Point end;
+        };
+
+        static void subdivide_grid(Maze& maze, std::mt19937& mersenne_twister, const Rect&);
 
         Unit floor;
         Unit wall;

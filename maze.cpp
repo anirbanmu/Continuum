@@ -25,66 +25,66 @@ Maze::Unit* const & Maze::cell(unsigned x, unsigned y) const
     return grid[x + y * width];
 }
 
-tuple<unsigned, unsigned> dimensions(const tuple<unsigned, unsigned>& rect_start, const tuple<unsigned, unsigned>& rect_end)
+unsigned long ensure_in_range(unsigned long value, unsigned long minimum, unsigned long maximum)
 {
-    return tuple<unsigned, unsigned>(get<0>(rect_end) - get<0>(rect_start), get<1>(rect_end) - get<1>(rect_start));
+    return max(min(value, maximum), minimum);
 }
 
-void Maze::subdivide_grid(Maze& maze, mt19937& mersenne_twister, tuple<unsigned, unsigned> rect_start, tuple<unsigned, unsigned> rect_end)
+void Maze::subdivide_grid(Maze& maze, mt19937& mersenne_twister, const Rect& rect)
 {
-    const auto rect_size = dimensions(rect_start, rect_end);
-    if (get<0>(rect_size) < 6 && get<1>(rect_size) < 6)
+    const auto rect_size = rect.dimensions();
+    if (rect_size.x < 6 && rect_size.y < 6)
     {
         return;
     }
 
     // Choose between horizontal & vertical division randomly if the rectangle is a square. Otherwise, choose to divide the longer dimension.
-    const bool horizontal = ((get<0>(rect_size) == get<1>(rect_size)) && mersenne_twister() % 2 == 0) || (get<1>(rect_size) > get<0>(rect_size));
+    const bool horizontal = ((rect_size.x == rect_size.y) && mersenne_twister() % 2 == 0) || (rect_size.y > rect_size.x);
     if (horizontal)
     {
         unsigned division_y = 1;
         while(division_y % 2 == 1)
         {
-            division_y = get<1>(rect_start) + max(min(mersenne_twister() % get<1>(rect_size), static_cast<unsigned long>(0.70 * get<1>(rect_size))), static_cast<unsigned long>(0.30 * get<1>(rect_size)));
+            division_y = rect.start.y + ensure_in_range(mersenne_twister() % rect_size.y, 0.30 * rect_size.y, 0.70 * rect_size.y);
         }
 
         unsigned opening = 0;
         while (opening % 2 == 0)
         {
-            opening = get<0>(rect_start) + mersenne_twister() % get<0>(rect_size);
+            opening = rect.start.x + mersenne_twister() % rect_size.x;
         }
 
-        for (unsigned x = get<0>(rect_start); x < get<0>(rect_end); ++x)
+        for (unsigned x = rect.start.x; x < rect.end.x; ++x)
         {
             maze.cell(x, division_y) = opening == x ? &maze.floor : &maze.wall;
         }
-        subdivide_grid(maze, mersenne_twister, rect_start, tuple<unsigned, unsigned>(get<0>(rect_end), division_y));
-        subdivide_grid(maze, mersenne_twister, tuple<unsigned, unsigned>(get<0>(rect_start), division_y + 1), rect_end);
+        subdivide_grid(maze, mersenne_twister, Rect(rect.start, Point(rect.end.x, division_y)));
+        subdivide_grid(maze, mersenne_twister, Rect(Point(rect.start.x, division_y + 1), rect.end));
         return;
     }
 
     unsigned division_x = 1;
     while(division_x % 2 == 1)
     {
-        division_x = get<0>(rect_start) + max(min(mersenne_twister() % get<0>(rect_size), static_cast<unsigned long>(0.70 * get<0>(rect_size))), static_cast<unsigned long>(0.30 * get<0>(rect_size)));
+        division_x = rect.start.x + ensure_in_range(mersenne_twister() % rect_size.x, 0.30 * rect_size.x, 0.70 * rect_size.x);
     }
 
     unsigned opening = 0;
     while (opening % 2 == 0)
     {
-        opening = get<1>(rect_start) + mersenne_twister() % get<1>(rect_size);
+        opening = rect.start.y + mersenne_twister() % rect_size.y;
     }
-    for (unsigned y = get<1>(rect_start); y < get<1>(rect_end); ++y)
+    for (unsigned y = rect.start.y; y < rect.end.y; ++y)
     {
         maze.cell(division_x, y) = opening == y ? &maze.floor : &maze.wall;
     }
-    subdivide_grid(maze, mersenne_twister, rect_start, tuple<unsigned, unsigned>(division_x, get<1>(rect_end)));
-    subdivide_grid(maze, mersenne_twister, tuple<unsigned, unsigned>(division_x + 1, get<1>(rect_start)), rect_end);
+    subdivide_grid(maze, mersenne_twister, Rect(rect.start, Point(division_x, rect.end.y)));
+    subdivide_grid(maze, mersenne_twister, Rect(Point(division_x + 1, rect.start.y), rect.end));
 }
 
 void Maze::generate_maze()
 {
     random_device rd;
     mt19937 mersenne_twister(rd());
-    subdivide_grid(*this, mersenne_twister, tuple<unsigned, unsigned>(0, 0), tuple<unsigned, unsigned>(width, height));
+    subdivide_grid(*this, mersenne_twister, Rect(0, 0, width, height));
 }
