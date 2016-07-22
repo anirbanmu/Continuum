@@ -1,5 +1,5 @@
 CXX := clang++-3.8
-CXXFLAGS := -O2 -Wall -Werror -std=c++14 -pthread
+CXXFLAGS := -O2 -Wall -Werror -std=c++14
 LINKFLAGS := -lncurses
 
 # Link

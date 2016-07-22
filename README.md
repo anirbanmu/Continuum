@@ -9,4 +9,7 @@ The following are required to make Continuum: makepp, ncurses, clang++ (or g++).
 
     apt-get install libncurses5 libncurses5-dev makepp clang-3.8
 
-After having the dependencies installed, run the command `makepp` from the directory you've put the project in. This should build object files and then a final runnable binary named `continuum`.
+After having the dependencies installed, run the command `makepp` from the directory you've put the project in. This should build object files and then a final runnable binary named `continuum`. If you want to use a different version of the clang++ compiler or g++, please replace the `CXX :=` line in Makefile to whatever binary is most appropriate for you.
+
+### Commandline options
+You can pass the dimensions of the maze you want generated as two integers in x, y order when running the binary. The maze generation uses 6 x 6 as the smallest base condition to stop subdividing rectangles, so for best results please use dimensions greater than 6 for both x and y!
