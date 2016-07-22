@@ -14,7 +14,7 @@ class CursesHandler
         ~CursesHandler();
         void register_per_frame_callback(std::function<void(int)>);
         void register_handler(int key, std::function<void(int)>);
-        void draw_char(int ch, int col, const Point&);
+        void draw_char(int ch, int col, const Point&, int attr = 0);
         void run_input_loop();
 
     private:

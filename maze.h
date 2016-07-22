@@ -27,6 +27,7 @@ class Maze
 
         Maze(unsigned width, unsigned height, const Unit& floor, const Unit& wall, const Unit& player);
         const Unit& cell(unsigned x, unsigned y) const;
+        bool cell_fogged(unsigned x, unsigned y) const;
         std::vector<const MoveableUnit*> moveable_units() const;
         void move_player(int x, int y);
         MoveableUnit& player();
@@ -34,15 +35,21 @@ class Maze
         const unsigned width;
         const unsigned height;
 
+        const Point entrance;
+        const Point exit;
+
         const Unit floor;
         const Unit wall;
 
     private:
         void generate_maze();
         static void subdivide_grid(Maze& maze, std::mt19937& mersenne_twister, const Rect&);
+        void uncover_fog(Point pos);
+        unsigned cell_idx(unsigned x, unsigned y) const;
 
         MoveableUnit pl;
         std::vector<const Unit*> grid; // Pointer array representing contents of maze grid
+        std::vector<bool> fog_grid; // Bool array representing which cells of the maze grid are uncovered by player movement
 };
 
 #endif

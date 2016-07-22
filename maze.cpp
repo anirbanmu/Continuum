@@ -35,16 +35,40 @@ void Maze::MoveableUnit::move(int x, int y)
 void Maze::move_player(int x, int y)
 {
     player().move(x, y);
+    uncover_fog(player().position);
 }
 
-Maze::Maze(unsigned w, unsigned h, const Unit& f, const Unit& wa, const Unit& p) : width(w), height(h), floor(f), wall(wa), pl(*this, p, 0, 0), grid(width * height, &floor)
+void Maze::uncover_fog(Point pos)
+{
+    const unsigned uncover_size = 3;
+    for (unsigned x = max<int>(0, pos.x - uncover_size); x <= min<int>(width - 1, pos.x + uncover_size); ++x)
+    {
+        for (unsigned y = max<int>(0, pos.y - uncover_size); y <= min<int>(height - 1, pos.y + uncover_size); ++y)
+        {
+            fog_grid[cell_idx(x, y)] = false;
+        }
+    }
+}
+
+Maze::Maze(unsigned w, unsigned h, const Unit& f, const Unit& wa, const Unit& p) : width(w), height(h), entrance(0, 0), exit(width - 1, height - 1), floor(f), wall(wa), pl(*this, p, 0, 0), grid(width * height, &floor), fog_grid(width * height, true)
 {
     generate_maze();
+    move_player(0, 0);
+}
+
+unsigned Maze::cell_idx(unsigned x, unsigned y) const
+{
+    return x + y * width;
 }
 
 const Maze::Unit& Maze::cell(unsigned x, unsigned y) const
 {
-    return *grid[x + y * width];
+    return *grid[cell_idx(x, y)];
+}
+
+bool Maze::cell_fogged(unsigned x, unsigned y) const
+{
+    return fog_grid[cell_idx(x, y)];
 }
 
 Maze::MoveableUnit& Maze::player()

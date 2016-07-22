@@ -22,7 +22,7 @@ void draw_frame(Maze& maze, CursesHandler& curses)
         for (unsigned y = 0; y < height; ++y)
         {
             const auto& cell = maze.cell(start.x + x, start.y + y);
-            curses.draw_char(cell.display_char, cell.color, Point(x, y));
+            curses.draw_char(cell.display_char, cell.color, Point(x, y), maze.cell_fogged(start.x + x, start.y + y) ? A_INVIS : 0);
         }
     }
 
@@ -50,10 +50,10 @@ int main(int argc, char** argv)
     draw_frame(maze, curses);
 
     // Call appropriate player movement functions on arrow key input
-    curses.register_handler(KEY_DOWN, [&](int){ maze.player().move(0, 1); });
-    curses.register_handler(KEY_UP, [&](int){ maze.player().move(0, -1); });
-    curses.register_handler(KEY_LEFT, [&](int){ maze.player().move(-1, 0); });
-    curses.register_handler(KEY_RIGHT, [&](int){ maze.player().move(1, 0); });
+    curses.register_handler(KEY_DOWN, [&](int){ maze.move_player(0, 1); });
+    curses.register_handler(KEY_UP, [&](int){ maze.move_player(0, -1); });
+    curses.register_handler(KEY_LEFT, [&](int){ maze.move_player(-1, 0); });
+    curses.register_handler(KEY_RIGHT, [&](int){ maze.move_player(1, 0); });
 
     curses.run_input_loop();
     return 0;

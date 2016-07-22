@@ -33,12 +33,12 @@ int CursesHandler::get_color(int color)
     return colors[color] = index;
 }
 
-void CursesHandler::draw_char(int ch, int col, const Point& position)
+void CursesHandler::draw_char(int ch, int col, const Point& position, int attr)
 {
     const unsigned color_index = get_color(col);
-    attron(COLOR_PAIR(color_index));
+    attron(COLOR_PAIR(color_index) | attr);
     mvwaddch(stdscr, position.y, position.x, ch);
-    attroff(COLOR_PAIR(color_index));
+    attroff(COLOR_PAIR(color_index) | attr);
 }
 
 void CursesHandler::register_handler(int key, std::function<void(int)> func)
