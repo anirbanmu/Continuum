@@ -13,7 +13,7 @@ void draw_frame(Maze& maze, CursesHandler& curses)
     getmaxyx(stdscr, term_height, term_width);
 
     const Point player_position = maze.player().position;
-    const auto start = Point(player_position.x > 4 ? player_position.x - 4 : 0, player_position.y > 4 ? player_position.y - 4 : 0);
+    const auto start = Point(term_width * (player_position.x / term_width), term_height * (player_position.y / term_height));
 
     const unsigned width = min(unsigned(term_width), maze.width - start.x);
     const unsigned height = min(unsigned(term_height), maze.height - start.y);
