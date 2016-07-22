@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ncurses.h>
 #include <cstring>
+#include <type_traits>
 
 #include "common.h"
 #include "curses.h"
@@ -8,10 +9,33 @@
 
 using namespace std;
 
+void draw_splash(CursesHandler& curses)
+{
+    const char* logo_text[] = { " _____             _   _                             ",
+                                "/  __ \\           | | (_)                            ",
+                                "| /  \\/ ___  _ __ | |_ _ _ __  _   _ _   _ _ __ ___  ",
+                                "| |    / _ \\| '_ \\| __| | '_ \\| | | | | | | '_ ` _ \\ ",
+                                "| \\__/\\ (_) | | | | |_| | | | | |_| | |_| | | | | | |",
+                                " \\____/\\___/|_| |_|\\__|_|_| |_|\\__,_|\\__,_|_| |_| |_|",
+                                "                                                     ",
+                                "                                                     ",
+                                "Press any key to start game or 'q' to exit."};
+
+    int term_width = 0, term_height = 0;
+    getmaxyx(stdscr, term_height, term_width);
+
+    for (unsigned i = 0; i < extent<decltype(logo_text)>::value; ++i)
+    {
+        mvprintw(i + term_height / 2, (term_width - strlen(logo_text[i])) / 2, "%s", logo_text[i]);
+    }
+}
+
 void draw_frame(Maze& maze, CursesHandler& curses)
 {
     int term_width = 0, term_height = 0;
     getmaxyx(stdscr, term_height, term_width);
+
+    clear();
 
     const Point player_position = maze.player().position;
 
@@ -56,13 +80,14 @@ int main(int argc, char** argv)
 
     // Always draw our game upon input
     curses.register_per_frame_callback([&](int){ draw_frame(maze, curses); });
-    draw_frame(maze, curses);
 
     // Call appropriate player movement functions on arrow key input
     curses.register_handler(KEY_DOWN, [&](int){ maze.move_player(0, 1); });
     curses.register_handler(KEY_UP, [&](int){ maze.move_player(0, -1); });
     curses.register_handler(KEY_LEFT, [&](int){ maze.move_player(-1, 0); });
     curses.register_handler(KEY_RIGHT, [&](int){ maze.move_player(1, 0); });
+
+    draw_splash(curses);
 
     curses.run_input_loop();
     return 0;
