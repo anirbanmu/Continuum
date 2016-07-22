@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ncurses.h>
+#include <cstring>
 
 #include "common.h"
 #include "curses.h"
@@ -13,6 +14,14 @@ void draw_frame(Maze& maze, CursesHandler& curses)
     getmaxyx(stdscr, term_height, term_width);
 
     const Point player_position = maze.player().position;
+
+    if (player_position.x == maze.exit.x && player_position.y == maze.exit.y)
+    {
+        const char* win_message = "You've found the exit of the maze! Press 'q' to exit or continue exploring the maze!";
+        mvprintw(term_height / 2, (term_width - strlen(win_message)) / 2, "%s", win_message);
+        return;
+    }
+
     const auto start = Point(term_width * (player_position.x / term_width), term_height * (player_position.y / term_height));
 
     const unsigned width = min(unsigned(term_width), maze.width - start.x);
