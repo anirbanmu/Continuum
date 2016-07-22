@@ -1,18 +1,19 @@
 #include <algorithm>
 #include <ncurses.h>
-
+#include <iostream>
 #include "curses.h"
 
 using namespace std;
 
-CursesHandler::CursesHandler()
+CursesHandler::CursesHandler() : color_index(1)
 {
     initscr();
+    start_color();
     use_default_colors();
     raw();
     keypad(stdscr, TRUE);
     noecho();
-    start_color();
+    curs_set(0);
 }
 
 CursesHandler::~CursesHandler()
@@ -20,24 +21,51 @@ CursesHandler::~CursesHandler()
     endwin();
 }
 
-void CursesHandler::render(const Maze& maze, const tuple<unsigned, unsigned>& start)
+int CursesHandler::get_color(int color)
 {
-    int term_width = 0, term_height = 0;
-    getmaxyx(stdscr, term_height, term_width);
-
-    const unsigned width = min(unsigned(term_width), maze.width - get<0>(start));
-    const unsigned height = min(unsigned(term_height), maze.height - get<1>(start));
-    for (unsigned x_incr = 0; x_incr < width; ++x_incr)
+    auto search = colors.find(color);
+    if (search != colors.end())
     {
-        for (unsigned y_incr = 0; y_incr < height; ++y_incr)
+        return search->second;
+    }
+    const auto index = color_index++;
+    init_pair(index, color, -1);
+    return colors[color] = index;
+}
+
+void CursesHandler::draw_char(int ch, int col, const Point& position, int attr)
+{
+    const unsigned color_index = get_color(col);
+    attron(COLOR_PAIR(color_index) | attr);
+    mvwaddch(stdscr, position.y, position.x, ch);
+    attroff(COLOR_PAIR(color_index) | attr);
+}
+
+void CursesHandler::register_handler(int key, std::function<void(int)> func)
+{
+    handlers[key] = func;
+}
+
+void CursesHandler::register_per_frame_callback(std::function<void(int)> func)
+{
+    always_call_input.emplace_back(func);
+}
+
+void CursesHandler::run_input_loop()
+{
+    int ch = '0';
+    while (ch != 'q')
+    {
+        ch = getch();
+        auto search = handlers.find(ch);
+        if (search != handlers.end())
         {
-            const auto& cell = *maze.cell(get<0>(start) + x_incr, get<1>(start) + y_incr);
-            init_pair(1, cell.color, -1);
-            attron(COLOR_PAIR(1));
-            mvwaddch(stdscr, y_incr, x_incr, cell.display_char);
-            attroff(COLOR_PAIR(1));
+            search->second(ch);
+        }
+
+        for (auto call_always : always_call_input)
+        {
+            call_always(ch);
         }
     }
-
-    wrefresh(stdscr);
 }
