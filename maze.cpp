@@ -32,6 +32,11 @@ void Maze::MoveableUnit::move(int x, int y)
     position = new_position;
 }
 
+void Maze::move_player(int x, int y)
+{
+    player().move(x, y);
+}
+
 Maze::Maze(unsigned w, unsigned h, const Unit& f, const Unit& wa, const Unit& p) : width(w), height(h), floor(f), wall(wa), pl(*this, p, 0, 0), grid(width * height, &floor)
 {
     generate_maze();

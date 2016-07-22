@@ -28,6 +28,7 @@ class Maze
         Maze(unsigned width, unsigned height, const Unit& floor, const Unit& wall, const Unit& player);
         const Unit& cell(unsigned x, unsigned y) const;
         std::vector<const MoveableUnit*> moveable_units() const;
+        void move_player(int x, int y);
         MoveableUnit& player();
 
         const unsigned width;

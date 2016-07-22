@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     curses.register_per_frame_callback([&](int){ draw_frame(maze, curses); });
     draw_frame(maze, curses);
 
-    // Call appropriate player movement functions until arrow key input
+    // Call appropriate player movement functions on arrow key input
     curses.register_handler(KEY_DOWN, [&](int){ maze.player().move(0, 1); });
     curses.register_handler(KEY_UP, [&](int){ maze.player().move(0, -1); });
     curses.register_handler(KEY_LEFT, [&](int){ maze.player().move(-1, 0); });
