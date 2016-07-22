@@ -36,7 +36,13 @@ void draw_frame(Maze& maze, CursesHandler& curses)
 
 int main(int argc, char** argv)
 {
-    auto maze = Maze(2048, 2048, Maze::Unit(' ', COLOR_BLACK), Maze::Unit('#', COLOR_GREEN), Maze::Unit('@', COLOR_WHITE));
+    int maze_width = argc >= 2 ? atoi(argv[1]) : 2048;
+    maze_width = maze_width < 0 ? 2048 : maze_width;
+
+    int maze_height = argc >= 3 ? atoi(argv[2]) : 2048;
+    maze_height = maze_height < 0 ? 2048 : maze_height;
+
+    auto maze = Maze(maze_width, maze_height, Maze::Unit(' ', COLOR_BLACK), Maze::Unit('#', COLOR_GREEN), Maze::Unit('@', COLOR_WHITE));
     auto curses = CursesHandler();
 
     // Always draw our game upon input
