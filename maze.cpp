@@ -10,28 +10,46 @@ Maze::Unit::Unit(int d, int c) : display_char(d), color(c)
 {
 }
 
-Maze::MoveableUnit::MoveableUnit(const Unit& u, int x, int y) : Unit(u), position(x, y)
+Maze::MoveableUnit::MoveableUnit(const Maze& m, const Unit& u, int x, int y) : Unit(u), position(x, y), maze(m)
 {
 }
 
-Maze::Maze(unsigned w, unsigned h, const Unit& f, const Unit& wa, const Unit& pl) : width(w), height(h), floor(f), wall(wa), player(pl, 0, 0), grid(width * height, &floor)
+void Maze::MoveableUnit::move(int x, int y)
+{
+    const auto new_position = Point(position.x + x, position.y + y);
+    if (new_position.x < 0 || new_position.x + 1 > maze.width)
+    {
+        return;
+    }
+    if (new_position.y < 0 || new_position.y + 1 > maze.height)
+    {
+        return;
+    }
+    if (&maze.cell(new_position.x, new_position.y) != &maze.floor)
+    {
+        return;
+    }
+    position = new_position;
+}
+
+Maze::Maze(unsigned w, unsigned h, const Unit& f, const Unit& wa, const Unit& p) : width(w), height(h), floor(f), wall(wa), pl(*this, p, 0, 0), grid(width * height, &floor)
 {
     generate_maze();
 }
 
-Maze::Unit*& Maze::cell(unsigned x, unsigned y)
+const Maze::Unit& Maze::cell(unsigned x, unsigned y) const
 {
-    return grid[x + y * width];
+    return *grid[x + y * width];
 }
 
-Maze::Unit* const & Maze::cell(unsigned x, unsigned y) const
+Maze::MoveableUnit& Maze::player()
 {
-    return grid[x + y * width];
+    return pl;
 }
 
 vector<const Maze::MoveableUnit*> Maze::moveable_units() const
 {
-    return vector<const MoveableUnit*>(1, &player);
+    return vector<const MoveableUnit*>(1, &pl);
 }
 
 unsigned long ensure_in_range(unsigned long value, unsigned long minimum, unsigned long maximum)
@@ -39,6 +57,7 @@ unsigned long ensure_in_range(unsigned long value, unsigned long minimum, unsign
     return max(min(value, maximum), minimum);
 }
 
+// Recursively divide the given rect with one opening per division (so all parts of the rect are connected)
 void Maze::subdivide_grid(Maze& maze, mt19937& mersenne_twister, const Rect& rect)
 {
     const auto rect_size = rect.dimensions();
@@ -65,7 +84,7 @@ void Maze::subdivide_grid(Maze& maze, mt19937& mersenne_twister, const Rect& rec
 
         for (unsigned x = rect.start.x; x < rect.end.x; ++x)
         {
-            maze.cell(x, division_y) = opening == x ? &maze.floor : &maze.wall;
+            maze.grid[x + division_y * maze.width] = opening == x ? &maze.floor : &maze.wall;
         }
         subdivide_grid(maze, mersenne_twister, Rect(rect.start, Point(rect.end.x, division_y)));
         subdivide_grid(maze, mersenne_twister, Rect(Point(rect.start.x, division_y + 1), rect.end));
@@ -85,7 +104,7 @@ void Maze::subdivide_grid(Maze& maze, mt19937& mersenne_twister, const Rect& rec
     }
     for (unsigned y = rect.start.y; y < rect.end.y; ++y)
     {
-        maze.cell(division_x, y) = opening == y ? &maze.floor : &maze.wall;
+        maze.grid[division_x + y * maze.width] = opening == y ? &maze.floor : &maze.wall;
     }
     subdivide_grid(maze, mersenne_twister, Rect(rect.start, Point(division_x, rect.end.y)));
     subdivide_grid(maze, mersenne_twister, Rect(Point(division_x + 1, rect.start.y), rect.end));

@@ -19,26 +19,29 @@ class Maze
 
         struct MoveableUnit : Unit
         {
-            MoveableUnit(const Unit&, int a, int b);
+            MoveableUnit(const Maze&, const Unit&, int a, int b);
+            void move(int x, int y);
             Point position;
+            const Maze& maze;
         };
 
         Maze(unsigned width, unsigned height, const Unit& floor, const Unit& wall, const Unit& player);
-        Unit* const & cell(unsigned x, unsigned y) const;
+        const Unit& cell(unsigned x, unsigned y) const;
         std::vector<const MoveableUnit*> moveable_units() const;
+        MoveableUnit& player();
 
         const unsigned width;
         const unsigned height;
 
+        const Unit floor;
+        const Unit wall;
+
     private:
-        Unit*& cell(unsigned x, unsigned y);
         void generate_maze();
         static void subdivide_grid(Maze& maze, std::mt19937& mersenne_twister, const Rect&);
 
-        Unit floor;
-        Unit wall;
-        MoveableUnit player;
-        std::vector<Unit*> grid; // Pointer array representing contents of maze grid
+        MoveableUnit pl;
+        std::vector<const Unit*> grid; // Pointer array representing contents of maze grid
 };
 
 #endif

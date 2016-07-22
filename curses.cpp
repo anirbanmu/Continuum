@@ -33,33 +33,39 @@ int CursesHandler::get_color(int color)
     return colors[color] = index;
 }
 
-void CursesHandler::draw_unit(const Maze::Unit& u, const Point& position)
+void CursesHandler::draw_char(int ch, int col, const Point& position)
 {
-    const unsigned color_index = get_color(u.color);
+    const unsigned color_index = get_color(col);
     attron(COLOR_PAIR(color_index));
-    mvwaddch(stdscr, position.y, position.x, u.display_char);
+    mvwaddch(stdscr, position.y, position.x, ch);
     attroff(COLOR_PAIR(color_index));
 }
 
-void CursesHandler::render(const Maze& maze, const Point& start)
+void CursesHandler::register_handler(int key, std::function<void(int)> func)
 {
-    int term_width = 0, term_height = 0;
-    getmaxyx(stdscr, term_height, term_width);
+    handlers[key] = func;
+}
 
-    const unsigned width = min(unsigned(term_width), maze.width - start.x);
-    const unsigned height = min(unsigned(term_height), maze.height - start.y);
-    for (unsigned x = 0; x < width; ++x)
+void CursesHandler::register_per_frame_callback(std::function<void(int)> func)
+{
+    always_call_input.emplace_back(func);
+}
+
+void CursesHandler::run_input_loop()
+{
+    int ch = '0';
+    while (ch != 'q')
     {
-        for (unsigned y = 0; y < height; ++y)
+        ch = getch();
+        auto search = handlers.find(ch);
+        if (search != handlers.end())
         {
-            draw_unit(*maze.cell(start.x + x, start.y + y), Point(start.x + x, start.y + y));
+            search->second(ch);
+        }
+
+        for (auto call_always : always_call_input)
+        {
+            call_always(ch);
         }
     }
-
-    for (auto u : maze.moveable_units())
-    {
-        draw_unit(*u, u->position);
-    }
-
-    wrefresh(stdscr);
 }
