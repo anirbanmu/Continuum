@@ -19,7 +19,7 @@ void draw_splash(CursesHandler& curses)
                                 " \\____/\\___/|_| |_|\\__|_|_| |_|\\__,_|\\__,_|_| |_| |_|",
                                 "                                                     ",
                                 "                                                     ",
-                                "Press any key to start game or 'q' to exit."};
+                                "Press any key to start game or 'q' to exit. Use arroy keys to move player!"};
 
     int term_width = 0, term_height = 0;
     getmaxyx(stdscr, term_height, term_width);
