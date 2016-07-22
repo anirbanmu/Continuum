@@ -10,6 +10,7 @@
 class Maze
 {
     public:
+        // Base unit
         struct Unit
         {
             Unit(int display_char, int color);
@@ -17,6 +18,7 @@ class Maze
             const int color;
         };
 
+        // Stores position of itself. Maze ref is stored to make sure our moves are valid!
         struct MoveableUnit : Unit
         {
             MoveableUnit(const Maze&, const Unit&, int a, int b);

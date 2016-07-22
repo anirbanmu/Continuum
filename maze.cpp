@@ -56,6 +56,7 @@ Maze::Maze(unsigned w, unsigned h, const Unit& f, const Unit& wa, const Unit& p)
     move_player(0, 0);
 }
 
+// Maps 2d grid into 1d vector
 unsigned Maze::cell_idx(unsigned x, unsigned y) const
 {
     return x + y * width;
@@ -90,12 +91,15 @@ unsigned long ensure_in_range(unsigned long value, unsigned long minimum, unsign
 void Maze::subdivide_grid(Maze& maze, mt19937& mersenne_twister, const Rect& rect)
 {
     const auto rect_size = rect.dimensions();
+
+    // Could be changed to parameter if developer requires this to be larger or smaller.
     if (rect_size.x < 6 && rect_size.y < 6)
     {
         return;
     }
 
     // Choose between horizontal & vertical division randomly if the rectangle is a square. Otherwise, choose to divide the longer dimension.
+    // We divide on even coordinate and place opening on odd coordinate, this is to prevent subdivision walls blocking our opening...
     const bool horizontal = ((rect_size.x == rect_size.y) && mersenne_twister() % 2 == 0) || (rect_size.y > rect_size.x);
     if (horizontal)
     {
@@ -111,10 +115,13 @@ void Maze::subdivide_grid(Maze& maze, mt19937& mersenne_twister, const Rect& rec
             opening = rect.start.x + mersenne_twister() % rect_size.x;
         }
 
+        // Place horizontal wall
         for (unsigned x = rect.start.x; x < rect.end.x; ++x)
         {
             maze.grid[x + division_y * maze.width] = opening == x ? &maze.floor : &maze.wall;
         }
+
+        // Subdivide top & bottom rectangles!
         subdivide_grid(maze, mersenne_twister, Rect(rect.start, Point(rect.end.x, division_y)));
         subdivide_grid(maze, mersenne_twister, Rect(Point(rect.start.x, division_y + 1), rect.end));
         return;
@@ -131,10 +138,14 @@ void Maze::subdivide_grid(Maze& maze, mt19937& mersenne_twister, const Rect& rec
     {
         opening = rect.start.y + mersenne_twister() % rect_size.y;
     }
+
+    // Place vertical wall
     for (unsigned y = rect.start.y; y < rect.end.y; ++y)
     {
         maze.grid[division_x + y * maze.width] = opening == y ? &maze.floor : &maze.wall;
     }
+
+    // Subdivide left & right rectangles!
     subdivide_grid(maze, mersenne_twister, Rect(rect.start, Point(division_x, rect.end.y)));
     subdivide_grid(maze, mersenne_twister, Rect(Point(division_x + 1, rect.start.y), rect.end));
 }

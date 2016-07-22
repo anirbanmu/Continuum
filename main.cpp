@@ -28,6 +28,8 @@ void draw_splash(CursesHandler& curses)
     {
         mvprintw(i + term_height / 2, (term_width - strlen(logo_text[i])) / 2, "%s", logo_text[i]);
     }
+
+    wrefresh(stdscr);
 }
 
 void draw_frame(Maze& maze, CursesHandler& curses)
@@ -43,11 +45,13 @@ void draw_frame(Maze& maze, CursesHandler& curses)
     {
         const char* win_message = "You've found the exit of the maze! Press 'q' to exit or continue exploring the maze!";
         mvprintw(term_height / 2, (term_width - strlen(win_message)) / 2, "%s", win_message);
+        wrefresh(stdscr);
         return;
     }
 
     const auto start = Point(term_width * (player_position.x / term_width), term_height * (player_position.y / term_height));
 
+    // Enables displaying greater than terminal dimension mazes!
     const unsigned width = min(unsigned(term_width), maze.width - start.x);
     const unsigned height = min(unsigned(term_height), maze.height - start.y);
     for (unsigned x = 0; x < width; ++x)
@@ -69,6 +73,7 @@ void draw_frame(Maze& maze, CursesHandler& curses)
 
 int main(int argc, char** argv)
 {
+    // Ignore negatives
     int maze_width = argc >= 2 ? atoi(argv[1]) : 2048;
     maze_width = maze_width < 0 ? 2048 : maze_width;
 
@@ -89,6 +94,7 @@ int main(int argc, char** argv)
 
     draw_splash(curses);
 
+    // Hand control over to the curses input handler
     curses.run_input_loop();
     return 0;
 }

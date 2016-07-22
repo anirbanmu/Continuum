@@ -57,6 +57,8 @@ void CursesHandler::run_input_loop()
     while (ch != 'q')
     {
         ch = getch();
+
+        // Do we need to call anyone for this key?
         auto search = handlers.find(ch);
         if (search != handlers.end())
         {
